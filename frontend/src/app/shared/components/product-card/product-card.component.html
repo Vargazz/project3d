@@ -1,0 +1,68 @@
+<div (click)="navigate()"
+  class="vm-card card-hover cursor-pointer group overflow-hidden flex flex-col h-full rounded-2xl">
+
+  <!-- Imagem -->
+  <div class="relative overflow-hidden bg-gray-100 aspect-square"
+    style="background:var(--surface-2)">
+    <img *ngIf="product.primaryImageUrl; else noImg"
+      [src]="product.primaryImageUrl"
+      [alt]="product.name"
+      class="w-full h-full object-cover transition-transform duration-400 group-hover:scale-105"
+      loading="lazy"/>
+    <ng-template #noImg>
+      <div class="w-full h-full flex flex-col items-center justify-center gap-2" style="color:var(--text-muted)">
+        <svg class="w-12 h-12 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <span class="text-xs opacity-50">Sem imagem</span>
+      </div>
+    </ng-template>
+
+    <!-- Badges topo-esquerda -->
+    <div class="absolute top-2 left-2 flex flex-col gap-1">
+      <span *ngIf="product.isNew"
+        class="badge text-[10px] px-2 py-0.5 rounded-full font-bold text-white"
+        style="background:linear-gradient(135deg,#9B59B6,#00BCD4)">NOVO</span>
+      <span *ngIf="hasDiscount"
+        class="badge bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">-{{discountPercent}}%</span>
+      <span *ngIf="product.isFeatured && !product.isNew"
+        class="badge badge-primary text-[10px]">DESTAQUE</span>
+    </div>
+
+    <!-- Sem estoque -->
+    <div *ngIf="!inStock"
+      class="absolute inset-0 flex items-center justify-center"
+      style="background:rgba(255,255,255,0.7)">
+      <span class="badge badge-gray text-xs font-bold">Indisponível</span>
+    </div>
+  </div>
+
+  <!-- Info -->
+  <div class="p-3 flex flex-col flex-1" style="background:var(--surface)">
+    <p class="text-[11px] font-semibold mb-0.5 vm3d-gradient-text">{{product.categoryName}}</p>
+    <h3 class="text-sm font-semibold leading-snug mb-2 line-clamp-2 flex-1" style="color:var(--text)">
+      {{product.name}}
+    </h3>
+
+    <!-- Preço -->
+    <div class="flex items-baseline gap-1.5 mb-3">
+      <span class="text-base font-black vm3d-gradient-text">{{displayPrice | currencyBrl}}</span>
+      <span *ngIf="hasDiscount" class="text-xs line-through" style="color:var(--text-muted)">
+        {{product.price | currencyBrl}}
+      </span>
+    </div>
+
+    <!-- Botão -->
+    <button
+      (click)="onAddToCart($event)"
+      [disabled]="!inStock"
+      class="btn-vm btn-sm w-full text-xs py-2 rounded-xl">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.4 7h12.8"/>
+      </svg>
+      {{ product.variants.length > 0 || product.customizationFields.length > 0 ? 'Ver opções' : 'Adicionar' }}
+    </button>
+  </div>
+</div>

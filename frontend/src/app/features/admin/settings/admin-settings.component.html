@@ -1,0 +1,14 @@
+<div>
+  <h1 class="text-2xl font-black text-dark-900 mb-6">Configurações da Loja</h1>
+  <div *ngIf="loading" class="text-center py-10 text-gray-400">Carregando...</div>
+  <div *ngIf="!loading" class="card p-6 max-w-2xl">
+    <div class="space-y-4">
+      <div *ngFor="let key of objectKeys(settings)">
+        <label class="label">{{ labels[key] || key }}</label>
+        <textarea *ngIf="key.includes('policy') || key.includes('terms') || key === 'store.description'" [(ngModel)]="settings[key]" rows="3" class="input resize-none"></textarea>
+        <input *ngIf="!key.includes('policy') && !key.includes('terms') && key !== 'store.description'" type="text" [(ngModel)]="settings[key]" class="input"/>
+      </div>
+    </div>
+    <button (click)="save()" [disabled]="saving" class="btn-primary mt-6">{{ saving ? 'Salvando...' : 'Salvar configurações' }}</button>
+  </div>
+</div>

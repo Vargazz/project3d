@@ -1,0 +1,150 @@
+<app-header></app-header>
+
+<main class="min-h-screen bg-gray-50 py-10">
+  <div class="container-app max-w-3xl">
+
+    <!-- Success state -->
+    <div *ngIf="submitted" class="card p-10 text-center">
+      <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
+        <span class="text-4xl">✅</span>
+      </div>
+      <h1 class="text-2xl font-black text-dark-900 mb-2">Solicitação enviada!</h1>
+      <p class="text-gray-600 mb-6">
+        Recebemos sua solicitação. Nossa equipe vai analisar e entrar em contato em breve com um orçamento personalizado.
+      </p>
+      <div class="flex gap-3 justify-center flex-wrap">
+        <a routerLink="/minha-conta/personalizados" class="btn-primary">Acompanhar solicitação</a>
+        <a routerLink="/" class="btn-secondary">Voltar ao início</a>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <ng-container *ngIf="!submitted">
+      <div class="text-center mb-8">
+        <span class="text-5xl block mb-3">✨</span>
+        <h1 class="text-3xl font-black text-dark-900 mb-2">Crie seu produto personalizado</h1>
+        <p class="text-gray-500">Preencha as informações e nossa equipe cria um orçamento exclusivo para você.</p>
+      </div>
+
+      <div class="card p-6 md:p-8">
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="space-y-5">
+
+          <!-- Tipo de produto -->
+          <div>
+            <label class="label">Tipo de produto *</label>
+            <select formControlName="productType" class="input" [class.input-error]="form.controls['productType'].invalid && form.controls['productType'].touched">
+              <option value="">Selecione...</option>
+              <option *ngFor="let t of productTypes" [value]="t">{{ t }}</option>
+            </select>
+            <p *ngIf="form.controls['productType'].invalid && form.controls['productType'].touched" class="error-msg">Selecione um tipo.</p>
+          </div>
+
+          <!-- Descrição -->
+          <div>
+            <label class="label">Descreva o que você deseja *</label>
+            <textarea formControlName="description" rows="4" class="input resize-none"
+              [class.input-error]="form.controls['description'].invalid && form.controls['description'].touched"
+              placeholder="Ex: Quero um Funko Pop baseado nessa foto, com capelo de formatura..."></textarea>
+            <div class="flex justify-between mt-1">
+              <p *ngIf="form.controls['description'].invalid && form.controls['description'].touched" class="error-msg">Mínimo de 20 caracteres.</p>
+              <span class="text-xs text-gray-400 ml-auto">{{ form.value.description?.length ?? 0 }} chars</span>
+            </div>
+          </div>
+
+          <!-- Grid de campos -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="label">Características</label>
+              <input type="text" formControlName="characteristics" class="input" placeholder="Ex: cabelo cacheado, óculos..."/>
+            </div>
+            <div>
+              <label class="label">Cores desejadas</label>
+              <input type="text" formControlName="desiredColors" class="input" placeholder="Ex: azul e dourado"/>
+            </div>
+            <div>
+              <label class="label">Tamanho aproximado</label>
+              <input type="text" formControlName="approximateSize" class="input" placeholder="Ex: 10cm de altura"/>
+            </div>
+            <div>
+              <label class="label">Quantidade *</label>
+              <input type="number" formControlName="quantity" class="input" min="1" [class.input-error]="form.controls['quantity'].invalid && form.controls['quantity'].touched"/>
+              <p *ngIf="form.controls['quantity'].invalid && form.controls['quantity'].touched" class="error-msg">Mínimo 1.</p>
+            </div>
+          </div>
+
+          <!-- Observações -->
+          <div>
+            <label class="label">Observações</label>
+            <textarea formControlName="observations" rows="2" class="input resize-none" placeholder="Alguma informação adicional..."></textarea>
+          </div>
+
+          <!-- Contato -->
+          <div class="border-t border-gray-100 pt-5">
+            <h3 class="font-semibold text-dark-800 mb-4">Seus dados de contato</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="label">Nome *</label>
+                <input type="text" formControlName="contactName" class="input" [class.input-error]="form.controls['contactName'].invalid && form.controls['contactName'].touched"/>
+                <p *ngIf="form.controls['contactName'].invalid && form.controls['contactName'].touched" class="error-msg">Nome obrigatório.</p>
+              </div>
+              <div>
+                <label class="label">E-mail *</label>
+                <input type="email" formControlName="contactEmail" class="input" [class.input-error]="form.controls['contactEmail'].invalid && form.controls['contactEmail'].touched"/>
+                <p *ngIf="form.controls['contactEmail'].invalid && form.controls['contactEmail'].touched" class="error-msg">E-mail inválido.</p>
+              </div>
+              <div>
+                <label class="label">WhatsApp</label>
+                <input type="tel" formControlName="contactWhatsApp" class="input" placeholder="(11) 99999-9999"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upload de imagens -->
+          <div class="border-t border-gray-100 pt-5">
+            <h3 class="font-semibold text-dark-800 mb-1">Fotos de referência</h3>
+            <p class="text-sm text-gray-500 mb-4">Envie fotos da pessoa, personagem ou objeto que deseja transformar em produto 3D. Até 5 imagens (JPG, PNG, WEBP).</p>
+
+            <!-- Drop zone -->
+            <div
+              (dragover)="$event.preventDefault(); dragOver=true"
+              (dragleave)="dragOver=false"
+              (drop)="onFileDrop($event)"
+              [class.border-primary-400]="dragOver"
+              [class.bg-primary-50]="dragOver"
+              class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer transition-colors hover:border-primary-400 hover:bg-primary-50"
+              (click)="fileInput.click()">
+              <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <p class="text-sm text-gray-500">Arraste imagens aqui ou <span class="text-primary-500 font-semibold">clique para selecionar</span></p>
+              <p class="text-xs text-gray-400 mt-1">JPG, JPEG, PNG, WEBP — máx. 10MB cada</p>
+              <input #fileInput type="file" multiple accept=".jpg,.jpeg,.png,.webp" (change)="onFileInput($event)" class="hidden">
+            </div>
+
+            <!-- Previews -->
+            <div *ngIf="images.length" class="grid grid-cols-5 gap-3 mt-4">
+              <div *ngFor="let img of images; let i = index" class="relative group">
+                <img [src]="img.url" [alt]="img.name" class="w-full aspect-square object-cover rounded-xl border border-gray-200">
+                <button type="button" (click)="removeImage(i)"
+                  class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow">
+                  ✕
+                </button>
+                <p class="text-xs text-gray-500 truncate mt-1">{{ img.name }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div class="pt-4 border-t border-gray-100 flex gap-3">
+            <button type="submit" [disabled]="loading" class="btn-primary btn-lg flex items-center gap-2 flex-1 justify-center">
+              <svg *ngIf="loading" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+              {{ loading ? (uploadingImages ? 'Enviando imagens...' : 'Enviando...') : '✨ Enviar solicitação' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </ng-container>
+  </div>
+</main>
+
+<app-footer></app-footer>

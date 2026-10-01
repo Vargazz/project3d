@@ -1,0 +1,5 @@
+.footer-link {
+  color: var(--text-muted);
+  transition: color 0.15s;
+}
+.footer-link:hover { color: #9B59B6; }

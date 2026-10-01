@@ -1,0 +1,6 @@
+@Project3D.API_HostAddress = http://localhost:5124
+
+GET {{Project3D.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

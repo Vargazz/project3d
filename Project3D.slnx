@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/backend/" />
+  <Folder Name="/backend/src/">
+    <Project Path="backend/src/Project3D.API/Project3D.API.csproj" />
+    <Project Path="backend/src/Project3D.Application/Project3D.Application.csproj" />
+    <Project Path="backend/src/Project3D.Domain/Project3D.Domain.csproj" />
+    <Project Path="backend/src/Project3D.Infrastructure/Project3D.Infrastructure.csproj" />
+  </Folder>
+</Solution>

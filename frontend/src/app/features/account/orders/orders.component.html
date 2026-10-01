@@ -1,0 +1,32 @@
+<div class="space-y-4">
+  <h2 class="text-xl font-bold text-dark-900">Meus Pedidos</h2>
+  <app-loading *ngIf="loading"></app-loading>
+  <div *ngIf="!loading && !orders.length" class="card p-10 text-center">
+    <span class="text-4xl block mb-3">📦</span>
+    <p class="text-gray-500">Você ainda não fez pedidos.</p>
+    <a routerLink="/produtos" class="btn-primary mt-4 inline-block">Ver produtos</a>
+  </div>
+  <div *ngFor="let o of orders" class="card p-4 space-y-3">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <span class="text-xs text-gray-500">Pedido</span>
+        <p class="font-bold text-dark-900">#{{ o.orderNumber }}</p>
+        <p class="text-xs text-gray-500">{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <span class="badge" [class]="statusClass(o.status)">{{ statusLabels[o.status] }}</span>
+        <span *ngIf="o.trackingCode" class="badge badge-blue">📦 {{ o.trackingCode }}</span>
+      </div>
+      <span class="font-bold text-dark-900">{{ o.total | currencyBrl }}</span>
+    </div>
+    <div class="flex gap-2 overflow-x-auto pb-1">
+      <div *ngFor="let item of o.items" class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 flex-shrink-0">
+        <img *ngIf="item.productImageUrl" [src]="item.productImageUrl" class="w-8 h-8 object-cover rounded">
+        <div>
+          <p class="text-xs font-medium text-dark-900 max-w-[150px] truncate">{{ item.productName }}</p>
+          <p class="text-xs text-gray-500">x{{ item.quantity }} — {{ item.unitPrice | currencyBrl }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

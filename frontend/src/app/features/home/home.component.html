@@ -1,0 +1,246 @@
+<app-header></app-header>
+
+<main>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- HERO SLIDER                                                            -->
+  <!-- Imagem cobre tudo com object-fit:cover, sem corte.                    -->
+  <!-- Thumbnails ficam no extremo direito; botão next fica antes delas (xl) -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <section class="relative w-full overflow-hidden" style="height:420px; background:#111;">
+
+    <!-- Wrapper de slides: todos em linha, transição CSS -->
+    <div class="absolute inset-0 flex"
+      style="transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94);"
+      [style.transform]="'translateX(-' + currentSlide * 100 + '%)'">
+
+      <div *ngFor="let s of slides"
+        class="relative flex-shrink-0 flex-grow-0"
+        style="width:100%; min-width:100%; height:420px;">
+
+        <!-- Imagem: mostra completa sem corte, fundo escuro -->
+        <img [src]="s.image" [alt]="s.title"
+          class="absolute inset-0 w-full h-full"
+          style="object-fit:contain; object-position:center; background:#111;"/>
+
+        <!-- Overlay -->
+        <div class="absolute inset-0"
+          style="background:linear-gradient(90deg,rgba(0,0,0,0.78) 0%,rgba(0,0,0,0.42) 50%,rgba(0,0,0,0.08) 100%)"></div>
+        <div class="absolute left-0 top-0 bottom-0 w-1/3 pointer-events-none"
+          style="background:linear-gradient(90deg,rgba(155,89,182,0.38) 0%,transparent 100%)"></div>
+
+        <!-- Texto -->
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full max-w-7xl mx-auto px-6 md:px-10">
+            <div class="max-w-lg">
+              <span class="inline-block text-[10px] font-bold uppercase tracking-[0.2em] mb-3 px-3 py-1 rounded-full border text-white/65 border-white/20">
+                VM3D Impressões Criativas
+              </span>
+              <h2 class="text-3xl md:text-5xl font-black text-white leading-tight mb-3 drop-shadow-lg">
+                {{s.title}}
+              </h2>
+              <p class="text-white/75 text-sm md:text-base mb-6 leading-relaxed max-w-sm">
+                {{s.sub}}
+              </p>
+              <a [routerLink]="s.link"
+                class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white text-sm shadow-xl transition-all duration-200 hover:scale-105"
+                style="background:linear-gradient(135deg,#9B59B6,#3498DB,#00BCD4)">
+                {{s.cta}}
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Botão ANTERIOR ── -->
+    <button (click)="prevSlide(); resetTimer()"
+      class="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full flex items-center justify-center text-white transition-all hover:scale-110"
+      style="background:rgba(0,0,0,0.4); backdrop-filter:blur(6px)">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+
+    <!-- ── Botão PRÓXIMO (telas < xl: borda direita normal) ── -->
+    <button (click)="nextSlide(); resetTimer()"
+      class="absolute right-3 top-1/2 -translate-y-1/2 z-30 xl:hidden w-10 h-10 rounded-full flex items-center justify-center text-white transition-all hover:scale-110"
+      style="background:rgba(0,0,0,0.4); backdrop-filter:blur(6px)">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
+
+    <!-- ── Botão PRÓXIMO (telas xl: fica antes das thumbnails) ── -->
+    <button (click)="nextSlide(); resetTimer()"
+      class="absolute top-1/2 -translate-y-1/2 z-30 hidden xl:flex w-10 h-10 rounded-full items-center justify-center text-white transition-all hover:scale-110"
+      style="right:88px; background:rgba(0,0,0,0.4); backdrop-filter:blur(6px)">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
+
+    <!-- ── Dots ── -->
+    <div class="absolute bottom-4 z-30 flex gap-2 items-center"
+      style="left:50%; transform:translateX(-50%)">
+      <button *ngFor="let s of slides; let i = index"
+        (click)="goToSlide(i)"
+        class="rounded-full transition-all duration-300 border-0 cursor-pointer p-0"
+        [style.width]="i === currentSlide ? '28px' : '8px'"
+        [style.height]="'8px'"
+        [style.background]="i === currentSlide ? 'linear-gradient(90deg,#9B59B6,#00BCD4)' : 'rgba(255,255,255,0.4)'">
+      </button>
+    </div>
+
+    <!-- ── Thumbnails laterais (só xl, lado direito) ── -->
+    <div class="absolute top-1/2 -translate-y-1/2 z-20 hidden xl:flex flex-col gap-2"
+      style="right:8px; width:72px;">
+      <button *ngFor="let s of slides; let i = index"
+        (click)="goToSlide(i)"
+        class="w-16 h-14 rounded-xl overflow-hidden border-2 transition-all duration-200"
+        [style.borderColor]="i === currentSlide ? '#9B59B6' : 'rgba(255,255,255,0.2)'"
+        [style.opacity]="i === currentSlide ? '1' : '0.5'">
+        <img [src]="s.image" [alt]="s.title" class="w-full h-full" style="object-fit:contain; background:#111;"/>
+      </button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- CATEGORIAS                                                             -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <section class="py-8" style="background:var(--bg)">
+    <div class="container-app">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="section-title text-xl">Categorias</h2>
+        <a routerLink="/produtos" class="text-sm font-semibold text-primary-500 hover:text-primary-600 transition-colors">Ver tudo →</a>
+      </div>
+      <div class="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-3">
+        <a *ngFor="let cat of categories"
+          [routerLink]="['/categorias', cat.slug]"
+          class="flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all hover:border-primary-400 hover:shadow-md cursor-pointer group vm-card">
+          <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl transition-transform group-hover:scale-110"
+            style="background:var(--surface-2)">
+            {{getCategoryEmoji(cat.slug)}}
+          </div>
+          <span class="text-xs font-semibold text-center leading-tight" style="color:var(--text)">{{cat.name}}</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- PRODUTOS COM ABAS                                                      -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <section class="py-8" style="background:var(--surface)">
+    <div class="container-app">
+      <div class="flex items-center gap-1 overflow-x-auto pb-2 mb-6 border-b" style="border-color:var(--border)">
+        <button *ngFor="let t of tabs"
+          (click)="setTab(t.id)"
+          class="tab-btn whitespace-nowrap shrink-0"
+          [class.tab-active]="activeTab === t.id">
+          {{t.label}}
+        </button>
+      </div>
+
+      <div *ngIf="loadingTab || loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div *ngFor="let _ of [1,2,3,4,5,6,7,8]" class="skeleton h-64 rounded-2xl"></div>
+      </div>
+
+      <ng-container *ngIf="!loadingTab && !loading">
+        <div *ngIf="tabProducts.length === 0" class="text-center py-12" style="color:var(--text-muted)">
+          <span class="text-4xl block mb-3">📭</span>
+          <p class="text-sm">Nenhum produto nesta categoria ainda.</p>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <app-product-card *ngFor="let p of tabProducts" [product]="p"></app-product-card>
+        </div>
+        <div class="text-center mt-8">
+          <a routerLink="/produtos" class="btn-vm-outline">Ver todos os produtos →</a>
+        </div>
+      </ng-container>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- CTA PERSONALIZADO                                                      -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <section class="py-16" style="background:var(--bg)">
+    <div class="container-app">
+      <div class="vm3d-border rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8"
+        style="background:var(--surface)">
+        <div class="flex-1 text-center md:text-left">
+          <span class="text-5xl block mb-4">✨</span>
+          <h2 class="text-3xl md:text-4xl font-black mb-3" style="color:var(--text)">
+            Crie seu produto <span class="vm3d-gradient-text">personalizado</span>
+          </h2>
+          <p class="text-base mb-6 max-w-xl leading-relaxed" style="color:var(--text-muted)">
+            Funko Pop, suportes, miniaturas, chaveiros e muito mais.
+            Mande a referência, nós criamos o modelo 3D e entregamos na sua porta.
+          </p>
+          <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+            <a routerLink="/personalizado" class="btn-vm btn-lg">Solicitar orçamento grátis</a>
+            <a routerLink="/produtos"      class="btn-secondary btn-lg">Ver exemplos</a>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3 shrink-0 w-full md:w-auto md:max-w-xs">
+          <div *ngFor="let step of [
+            {icon:'📸', n:'01', t:'Envie a referência'},
+            {icon:'🎨', n:'02', t:'Criamos o modelo'},
+            {icon:'🖨️', n:'03', t:'Imprimimos'},
+            {icon:'📦', n:'04', t:'Entregamos'}
+          ]" class="vm-card p-4 text-center">
+            <div class="text-2xl mb-2">{{step.icon}}</div>
+            <div class="text-xs font-black vm3d-gradient-text mb-1">{{step.n}}</div>
+            <div class="text-xs font-semibold" style="color:var(--text)">{{step.t}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- SOBRE VM3D                                                             -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <section class="py-14" style="background:var(--surface)">
+    <div class="container-app">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <span class="badge badge-primary mb-3">Sobre nós</span>
+          <h2 class="text-3xl font-black mb-4" style="color:var(--text)">
+            VM3D <span class="vm3d-gradient-text">Impressões Criativas</span>
+          </h2>
+          <p class="mb-4 leading-relaxed" style="color:var(--text-muted)">
+            Especializados em impressão 3D de alta qualidade — desde miniaturas colecionáveis
+            e suportes para gamers até presentes únicos e personalizados.
+          </p>
+          <p class="mb-6 leading-relaxed" style="color:var(--text-muted)">
+            Cada peça é impressa com filamentos premium e atenção meticulosa aos detalhes.
+          </p>
+          <a routerLink="/personalizado" class="btn-vm inline-flex items-center gap-2">
+            Solicitar produto personalizado
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </a>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div *ngFor="let stat of [
+            {value:'500+', label:'Produtos entregues'},
+            {value:'100%', label:'Personalizável'},
+            {value:'4.9★', label:'Avaliação média'},
+            {value:'3D',   label:'Alta qualidade'}
+          ]" class="vm-card p-5 text-center">
+            <p class="text-3xl font-black vm3d-gradient-text">{{stat.value}}</p>
+            <p class="text-sm mt-1" style="color:var(--text-muted)">{{stat.label}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<app-footer></app-footer>

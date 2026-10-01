@@ -1,0 +1,141 @@
+<div>
+  <h1 class="text-2xl font-black text-dark-900 mb-6">Pedidos Personalizados</h1>
+
+  <div class="flex gap-3 mb-4">
+    <select [(ngModel)]="statusFilter" (change)="load()" class="input max-w-xs">
+      <option value="">Todos os status</option>
+      <option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</option>
+    </select>
+  </div>
+
+  <div class="space-y-3">
+    <div *ngIf="loading" class="text-center py-10 text-gray-400">Carregando...</div>
+    <div *ngFor="let r of requests"
+      class="card p-4 flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <p class="text-xs text-gray-400">#{{ r.requestNumber }} · {{ r.createdAt | date:'dd/MM/yy' }}</p>
+        <p class="font-bold text-dark-900 mt-0.5">{{ r.productType }}</p>
+        <p class="text-sm text-gray-600 truncate max-w-sm mt-0.5">{{ r.description }}</p>
+        <p class="text-xs text-gray-500 mt-1">{{ r.contactName }} · {{ r.contactEmail }}</p>
+        <div class="flex gap-1 mt-2">
+          <img *ngFor="let img of r.images | slice:0:4" [src]="img.url"
+            class="w-10 h-10 rounded-lg object-cover border border-gray-100">
+        </div>
+      </div>
+      <div class="flex flex-col items-end gap-2">
+        <span class="badge" [class]="statusClass(r.status)">{{ statusLabels[r.status] }}</span>
+        <button (click)="select(r)" class="btn-secondary btn-sm">Gerenciar</button>
+      </div>
+    </div>
+    <div *ngIf="!loading && !requests.length" class="card p-10 text-center text-gray-400">
+      Nenhuma solicitação encontrada.
+    </div>
+  </div>
+
+  <!-- Modal: Gerenciar solicitação -->
+  <div *ngIf="selected"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);"
+    (click)="selected=null">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto"
+      (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="px-6 pt-6 pb-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+        <div>
+          <h3 class="text-lg font-bold text-dark-900">{{ selected.productType }}</h3>
+          <p class="text-xs text-gray-400 mt-0.5">#{{ selected.requestNumber }}</p>
+        </div>
+        <button (click)="selected=null"
+          class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors flex-shrink-0 ml-3">
+          ✕
+        </button>
+      </div>
+
+      <!-- Detalhes do pedido -->
+      <div class="px-6 py-4 space-y-2 text-sm border-b border-gray-100">
+        <div class="grid grid-cols-2 gap-2">
+          <div><p class="text-xs text-gray-400">Cliente</p><p class="font-medium text-dark-900">{{ selected.contactName }}</p></div>
+          <div><p class="text-xs text-gray-400">E-mail</p><p class="font-medium text-dark-900 truncate">{{ selected.contactEmail }}</p></div>
+          <div *ngIf="selected.contactWhatsApp"><p class="text-xs text-gray-400">WhatsApp</p><p class="font-medium text-dark-900">{{ selected.contactWhatsApp }}</p></div>
+          <div><p class="text-xs text-gray-400">Quantidade</p><p class="font-medium text-dark-900">{{ selected.quantity }}</p></div>
+        </div>
+        <div class="pt-1">
+          <p class="text-xs text-gray-400 mb-1">Descrição</p>
+          <p class="text-sm text-gray-700 bg-gray-50 rounded-xl p-3">{{ selected.description }}</p>
+        </div>
+        <div *ngIf="selected.characteristics">
+          <p class="text-xs text-gray-400 mb-1">Características</p>
+          <p class="text-sm text-gray-700">{{ selected.characteristics }}</p>
+        </div>
+        <div *ngIf="selected.desiredColors">
+          <p class="text-xs text-gray-400 mb-1">Cores desejadas</p>
+          <p class="text-sm text-gray-700">{{ selected.desiredColors }}</p>
+        </div>
+        <div *ngIf="selected.approximateSize">
+          <p class="text-xs text-gray-400 mb-1">Tamanho aproximado</p>
+          <p class="text-sm text-gray-700">{{ selected.approximateSize }}</p>
+        </div>
+        <div *ngIf="selected.observations">
+          <p class="text-xs text-gray-400 mb-1">Observações</p>
+          <p class="text-sm text-gray-700 italic">{{ selected.observations }}</p>
+        </div>
+      </div>
+
+      <!-- Imagens -->
+      <div *ngIf="selected.images.length" class="px-6 py-4 border-b border-gray-100">
+        <p class="text-xs text-gray-400 mb-2">Imagens enviadas</p>
+        <div class="flex gap-2 flex-wrap">
+          <a *ngFor="let img of selected.images" [href]="img.url" target="_blank">
+            <img [src]="img.url" class="w-16 h-16 rounded-xl object-cover border border-gray-200 hover:border-purple-400 transition-colors">
+          </a>
+        </div>
+      </div>
+
+      <div class="px-6 py-5 space-y-5">
+        <!-- Atualizar status -->
+        <div>
+          <h4 class="font-semibold text-dark-800 mb-3">Atualizar status</h4>
+          <div class="flex gap-3">
+            <select [(ngModel)]="updateStatusVal" class="input flex-1">
+              <option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</option>
+            </select>
+            <button (click)="updateStatus()" [disabled]="submitting"
+              class="btn-secondary btn-sm disabled:opacity-50">
+              Salvar
+            </button>
+          </div>
+        </div>
+
+        <!-- Enviar orçamento -->
+        <div class="border-t border-gray-100 pt-5">
+          <h4 class="font-semibold text-dark-800 mb-3">💰 Enviar orçamento</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="label">Valor (R$) *</label>
+              <input type="number" [(ngModel)]="quotePrice" class="input" placeholder="0.00" min="0.01"/>
+            </div>
+            <div>
+              <label class="label">Prazo (dias úteis) *</label>
+              <input type="number" [(ngModel)]="quoteDays" class="input" placeholder="7" min="1"/>
+            </div>
+            <div class="col-span-2">
+              <label class="label">Descrição do orçamento</label>
+              <textarea [(ngModel)]="quoteDesc" rows="2" class="input resize-none"
+                placeholder="Detalhes, materiais, condições..."></textarea>
+            </div>
+          </div>
+          <button (click)="sendQuote()" [disabled]="submitting || !quotePrice"
+            class="btn-primary w-full mt-3 disabled:opacity-50">
+            {{ submitting ? 'Enviando...' : 'Enviar orçamento ao cliente' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 pb-6">
+        <button (click)="selected=null" class="btn-secondary w-full">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>

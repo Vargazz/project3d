@@ -1,0 +1,21 @@
+.cat-btn {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: all 0.15s;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: block;
+}
+.cat-btn:hover {
+  background: rgba(155, 89, 182, 0.08);
+  color: #9B59B6;
+}
+.cat-btn-active {
+  background: rgba(155, 89, 182, 0.12) !important;
+  color: #9B59B6 !important;
+  font-weight: 600;
+}

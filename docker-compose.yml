@@ -1,0 +1,128 @@
+services:
+
+  # ────────────────────────────────────────────────────────────────
+  # PostgreSQL
+  # ────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: project3d_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB:-project3d}
+      POSTGRES_USER:     ${POSTGRES_USER:-project3d_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-project3d_pass}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-project3d_user} -d ${POSTGRES_DB:-project3d}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ────────────────────────────────────────────────────────────────
+  # pgAdmin (interface web para o banco)
+  # Acesse: http://localhost:5050
+  # Login: admin@project3d.local / admin123
+  # ────────────────────────────────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: project3d_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL:    ${PGADMIN_EMAIL:-admin@vm3d.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+    ports:
+      - '5050:80'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  # ────────────────────────────────────────────────────────────────
+  # Backend — ASP.NET Core API
+  # Acesse: http://localhost:5000
+  # ────────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: project3d_api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ASPNETCORE_URLS: http://+:5000
+
+      # Banco de dados — aponta para o container postgres
+      ConnectionStrings__DefaultConnection: >-
+        Host=postgres;Port=5432;
+        Database=${POSTGRES_DB:-project3d};
+        Username=${POSTGRES_USER:-project3d_user};
+        Password=${POSTGRES_PASSWORD:-project3d_pass}
+
+      # JWT
+      Jwt__SecretKey:           ${JWT_SECRET:-KW2DQqyI6@+etXhT05Nd$87%=AbEonlRUS#BJr4spY9imx3jF1LzauCH!-c&*wZM}
+      Jwt__Issuer:              project3d-api
+      Jwt__Audience:            project3d-client
+      Jwt__ExpiresInMinutes:    ${JWT_EXPIRES:-60}
+      Jwt__RefreshExpiresInDays: ${JWT_REFRESH_DAYS:-7}
+
+      # Mercado Pago (deixar em branco até ter as keys)
+      MercadoPago__AccessToken:    ${MP_ACCESS_TOKEN:-}
+      MercadoPago__PublicKey:      ${MP_PUBLIC_KEY:-}
+      MercadoPago__WebhookSecret:  ${MP_WEBHOOK_SECRET:-}
+      MercadoPago__NotificationUrl: ${MP_NOTIFICATION_URL:-http://localhost:5000/api/payments/webhook}
+      MercadoPago__SuccessUrl:     ${MP_SUCCESS_URL:-http://localhost/pedido/sucesso}
+      MercadoPago__FailureUrl:     ${MP_FAILURE_URL:-http://localhost/pedido/falha}
+      MercadoPago__PendingUrl:     ${MP_PENDING_URL:-http://localhost/pedido/pendente}
+
+      # Cloudinary (desabilitado por padrão — usa upload local)
+      Upload__UseLocal: ${UPLOAD_USE_LOCAL:-true}
+      Cloudinary__CloudName: ${CLOUDINARY_CLOUD_NAME:-}
+      Cloudinary__ApiKey:    ${CLOUDINARY_API_KEY:-}
+      Cloudinary__ApiSecret: ${CLOUDINARY_API_SECRET:-}
+
+      # CORS — permite o frontend do nginx
+      Cors__AllowedOrigins__0: http://localhost
+      Cors__AllowedOrigins__1: http://localhost:4200
+
+      # Admin seed
+      Seed__AdminEmail:    ${ADMIN_EMAIL:-admin@project3d.com}
+      Seed__AdminPassword: ${ADMIN_PASSWORD:-Admin@123456}
+      Seed__AdminName:     ${ADMIN_NAME:-Administrador}
+
+    ports:
+      - '5000:5000'
+    volumes:
+      - api_uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:5000/health 2>/dev/null || exit 0']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ────────────────────────────────────────────────────────────────
+  # Frontend — Angular via Nginx
+  # Acesse: http://localhost
+  # ────────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: project3d_frontend
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  api_uploads:

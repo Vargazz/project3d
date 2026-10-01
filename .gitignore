@@ -1,0 +1,182 @@
+# =============================================================
+# .gitignore — Project3D
+# =============================================================
+
+# -------------------------------------------------------
+# Segurança — NUNCA versionar estes arquivos
+# -------------------------------------------------------
+.env
+.env.local
+.env.*.local
+*.env
+appsettings.Production.json
+appsettings.Staging.json
+secrets.json
+
+# -------------------------------------------------------
+# Upload local de desenvolvimento
+# -------------------------------------------------------
+uploads/
+backend/uploads/
+
+# -------------------------------------------------------
+# .NET / C#
+# -------------------------------------------------------
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+*.rsuser
+.idea/
+*.DotSettings.user
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp_proj
+*_wpftmp.csproj
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+_Chutzpah*
+ipch/
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
+*.psess
+*.vsp
+*.vspx
+*.sap
+*.e2e
+$tf/
+*.gpState
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings
+TeamCity*
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+*.[Mm]ine
+*.tt.cs
+*.jmconfig
+*.bim.layout
+*.bim_*.layout
+*.rptproj.rsuser
+*- [Bb]ackup.rdl
+*- [Bb]ackup ([0-9]).rdl
+*- [Bb]ackup ([0-9][0-9]).rdl
+*.GhostDoc.xml
+.ntvs_analysis.dat
+*.nvuser
+.paket/
+paket-files/
+.fake/
+CoreTestResults/
+*.coverage
+*.coveragexml
+_NCrunch_*
+nunit-*.xml
+*.received.*
+StyleCopReport.xml
+*.[Cc]ache
+![Ss]tyle[Cc]op.[Cc]ache
+![Ss]tyle[Cc]op.[Cc]ache/
+*.[Cc]ache/
+RailsInstaller/
+Tools/
+publish/
+*.publishsettings
+orleans.codegen.cs
+!**/[Pp]ackages/build/
+!**/[Pp]ackages/repositories.config
+*.nupkg
+*.snupkg
+**/[Pp]ackages/
+!**/[Pp]ackages/build/
+TestResult.xml
+*.retry
+BenchmarkDotNet.Artifacts/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+!**/.yarn/patches
+!**/.yarn/plugins
+!**/.yarn/releases
+!**/.yarn/sdks
+!**/.yarn/versions
+node_modules/
+
+# -------------------------------------------------------
+# Angular / Node
+# -------------------------------------------------------
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.sass-cache/
+frontend/connect.lock
+frontend/coverage/
+frontend/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+.yarn-integrity
+.npm
+.node_repl_history
+*.tgz
+.nyc_output
+.grunt
+bower_components
+.lock-wscript
+build/Release
+jspm_packages/
+typings/
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# -------------------------------------------------------
+# OS
+# -------------------------------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk

@@ -1,0 +1,217 @@
+<app-header></app-header>
+
+<main class="min-h-screen" style="background:var(--bg)">
+
+  <!-- Breadcrumb -->
+  <div style="background:var(--surface); border-bottom:1px solid var(--border)">
+    <div class="container-app py-3 flex items-center gap-2 text-sm" style="color:var(--text-muted)">
+      <a routerLink="/" class="hover:text-primary-500 transition-colors">Home</a>
+      <span>/</span>
+      <span class="font-semibold" style="color:var(--text)">{{ activeCategory?.name || 'Produtos' }}</span>
+    </div>
+  </div>
+
+  <div class="container-app py-6">
+
+    <!-- Cabeçalho + busca -->
+    <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+      <div class="flex-1">
+        <h1 class="text-2xl font-black" style="color:var(--text)">
+          {{ activeCategory?.name || 'Todos os Produtos' }}
+        </h1>
+        <p class="text-sm mt-1" style="color:var(--text-muted)" *ngIf="!loading">
+          {{ totalItems }} produto{{ totalItems !== 1 ? 's' : '' }} encontrado{{ totalItems !== 1 ? 's' : '' }}
+        </p>
+      </div>
+
+      <!-- Busca -->
+      <div class="relative w-full sm:w-72">
+        <input [formControl]="searchControl" type="text" placeholder="Buscar produtos..."
+          class="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none transition-all"
+          style="background:var(--surface); border:1.5px solid var(--border); color:var(--text);"
+          onfocus="this.style.borderColor='#9B59B6'"
+          onblur="this.style.borderColor='var(--border)'"/>
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color:var(--text-muted)"
+          fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+
+      <!-- Botão filtro mobile -->
+      <button (click)="sidebarOpen = !sidebarOpen"
+        class="sm:hidden flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all"
+        style="background:var(--surface); border:1.5px solid var(--border); color:var(--text)">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+        </svg>
+        Filtros
+      </button>
+    </div>
+
+    <div class="flex gap-6">
+
+      <!-- ── SIDEBAR ── -->
+      <aside [class.hidden]="!sidebarOpen"
+        class="sm:block w-56 flex-shrink-0 space-y-3">
+
+        <!-- Ordenar (mobile) -->
+        <div class="sm:hidden vm-card p-4">
+          <label class="block text-xs font-semibold uppercase mb-2" style="color:var(--text-muted)">Ordenar</label>
+          <select [value]="sortValue" (change)="onSortChange($any($event.target).value)" class="input text-sm">
+            <option *ngFor="let o of sortOptions" [value]="o.value">{{ o.label }}</option>
+          </select>
+        </div>
+
+        <!-- Categorias -->
+        <div class="vm-card p-4">
+          <h3 class="text-xs font-bold uppercase tracking-wider mb-3" style="color:var(--text-muted)">Categorias</h3>
+          <ul class="space-y-0.5">
+            <li>
+              <button (click)="clearCategoryFilter()"
+                class="cat-btn w-full text-left"
+                [class.cat-btn-active]="!selectedCategoryId">
+                Todos os produtos
+              </button>
+            </li>
+            <li *ngFor="let cat of displayCategories">
+              <button (click)="onCategoryChange(cat)"
+                class="cat-btn w-full text-left"
+                [class.cat-btn-active]="selectedCategoryId === cat.id && cat.id">
+                {{ cat.name }}
+              </button>
+              <!-- Subcategorias -->
+              <ul *ngIf="selectedCategoryId === cat.id && cat.id && cat.subcategories?.length" class="ml-3 mt-0.5 space-y-0.5">
+                <li *ngFor="let sub of cat.subcategories">
+                  <button (click)="onSubcategoryChange(sub.id)"
+                    class="cat-btn w-full text-left text-xs"
+                    [class.cat-btn-active]="selectedSubcategoryId === sub.id">
+                    → {{ sub.name }}
+                  </button>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Faixa de preço -->
+        <div class="vm-card p-4">
+          <h3 class="text-xs font-bold uppercase tracking-wider mb-3" style="color:var(--text-muted)">Faixa de preço</h3>
+          <div class="flex gap-2 mb-3">
+            <div class="flex-1">
+              <label class="text-xs mb-1 block" style="color:var(--text-muted)">Mín (R$)</label>
+              <input type="number" [(ngModel)]="minPrice" placeholder="0"
+                class="w-full rounded-lg px-2 py-1.5 text-sm outline-none"
+                style="background:var(--surface-2); border:1px solid var(--border); color:var(--text)"/>
+            </div>
+            <div class="flex-1">
+              <label class="text-xs mb-1 block" style="color:var(--text-muted)">Máx (R$)</label>
+              <input type="number" [(ngModel)]="maxPrice" placeholder="∞"
+                class="w-full rounded-lg px-2 py-1.5 text-sm outline-none"
+                style="background:var(--surface-2); border:1px solid var(--border); color:var(--text)"/>
+            </div>
+          </div>
+          <button (click)="applyPriceFilter()" class="w-full btn-vm text-sm py-2">Aplicar</button>
+        </div>
+
+        <!-- Outros filtros -->
+        <div class="vm-card p-4 space-y-2.5">
+          <h3 class="text-xs font-bold uppercase tracking-wider mb-3" style="color:var(--text-muted)">Outros filtros</h3>
+          <label class="flex items-center gap-2 cursor-pointer text-sm" style="color:var(--text)">
+            <input type="checkbox" [(ngModel)]="inStockOnly" (change)="loadProducts()"
+              class="rounded accent-purple-500">
+            Em estoque
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer text-sm" style="color:var(--text)">
+            <input type="checkbox" [(ngModel)]="showFeatured" (change)="loadProducts()"
+              class="rounded accent-purple-500">
+            ⭐ Destaques
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer text-sm" style="color:var(--text)">
+            <input type="checkbox" [(ngModel)]="showNew" (change)="loadProducts()"
+              class="rounded accent-purple-500">
+            🆕 Novidades
+          </label>
+        </div>
+
+        <!-- Limpar -->
+        <button (click)="clearFilters()"
+          class="w-full flex items-center justify-center gap-1.5 text-sm py-2 rounded-xl transition-colors"
+          style="color:var(--text-muted)"
+          onmouseenter="this.style.color='#ef4444'"
+          onmouseleave="this.style.color='var(--text-muted)'">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+          Limpar filtros
+        </button>
+      </aside>
+
+      <!-- ── CONTEÚDO PRINCIPAL ── -->
+      <div class="flex-1 min-w-0">
+
+        <!-- Barra de ordenação desktop -->
+        <div class="hidden sm:flex items-center justify-between mb-4">
+          <span class="text-sm" style="color:var(--text-muted)">
+            <ng-container *ngIf="!loading">
+              <span class="font-semibold vm3d-gradient-text">{{ totalItems }}</span>
+              produto{{ totalItems !== 1 ? 's' : '' }} encontrado{{ totalItems !== 1 ? 's' : '' }}
+            </ng-container>
+          </span>
+          <div class="flex items-center gap-2">
+            <label class="text-sm" style="color:var(--text-muted)">Ordenar:</label>
+            <select [value]="sortValue" (change)="onSortChange($any($event.target).value)"
+              class="rounded-xl px-3 py-1.5 text-sm outline-none transition-all cursor-pointer"
+              style="background:var(--surface); border:1.5px solid var(--border); color:var(--text)">
+              <option *ngFor="let o of sortOptions" [value]="o.value">{{ o.label }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <app-loading *ngIf="loading" text="Buscando produtos..."></app-loading>
+
+        <!-- Estado vazio -->
+        <div *ngIf="!loading && products.length === 0" class="text-center py-16">
+          <span class="text-5xl block mb-4">🔍</span>
+          <h3 class="text-lg font-bold mb-2" style="color:var(--text)">Nenhum produto encontrado</h3>
+          <p class="text-sm mb-5" style="color:var(--text-muted)">Tente ajustar os filtros ou a busca</p>
+          <button (click)="clearFilters()" class="btn-vm">Limpar filtros</button>
+        </div>
+
+        <!-- Grid de produtos -->
+        <div *ngIf="!loading && products.length > 0"
+          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <app-product-card *ngFor="let p of products" [product]="p"></app-product-card>
+        </div>
+
+        <!-- Paginação -->
+        <div *ngIf="totalPages > 1" class="flex items-center justify-center gap-2 mt-8">
+          <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1"
+            class="px-3 py-2 rounded-xl text-sm transition-all disabled:opacity-40"
+            style="background:var(--surface); border:1px solid var(--border); color:var(--text)">
+            ‹
+          </button>
+          <ng-container *ngFor="let p of pages">
+            <button (click)="goToPage(p)"
+              class="px-3 py-2 rounded-xl text-sm font-semibold transition-all min-w-[36px]"
+              [style.background]="p === currentPage ? 'linear-gradient(135deg,#9B59B6,#00BCD4)' : 'var(--surface)'"
+              [style.color]="p === currentPage ? '#fff' : 'var(--text)'"
+              [style.border]="'1px solid ' + (p === currentPage ? 'transparent' : 'var(--border)')">
+              {{ p }}
+            </button>
+          </ng-container>
+          <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages"
+            class="px-3 py-2 rounded-xl text-sm transition-all disabled:opacity-40"
+            style="background:var(--surface); border:1px solid var(--border); color:var(--text)">
+            ›
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<app-footer></app-footer>

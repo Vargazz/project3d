@@ -1,0 +1,74 @@
+<div>
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-black text-dark-900">Categorias</h1>
+    <button (click)="open()" class="btn-primary">+ Nova categoria</button>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div *ngIf="loading" class="col-span-3 text-center py-8 text-gray-400">Carregando...</div>
+    <div *ngFor="let c of categories" class="card p-4 flex items-start justify-between gap-3">
+      <div>
+        <p class="font-semibold text-dark-900">{{ c.name }}</p>
+        <p class="text-xs text-gray-500">{{ c.slug }}</p>
+        <p class="text-xs text-gray-400 mt-1">{{ c.subcategories?.length ?? 0 }} subcategorias</p>
+        <span class="badge mt-2 inline-block" [class.badge-green]="c.isActive" [class.badge-gray]="!c.isActive">
+          {{ c.isActive ? 'Ativa' : 'Inativa' }}
+        </span>
+      </div>
+      <div class="flex gap-2 flex-shrink-0">
+        <button (click)="open(c)" class="btn-secondary btn-sm">Editar</button>
+        <button (click)="remove(c)" class="text-red-500 text-xs hover:text-red-700 px-2 py-1 rounded transition-colors">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div *ngIf="showForm"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);"
+    (click)="showForm=false">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+      (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="px-6 pt-6 pb-4 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-dark-900">{{ editCat ? 'Editar categoria' : 'Nova categoria' }}</h3>
+          <p class="text-sm text-gray-500 mt-0.5">{{ editCat ? 'Altere os dados da categoria.' : 'Preencha para criar uma nova categoria.' }}</p>
+        </div>
+        <button (click)="showForm=false"
+          class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors flex-shrink-0 ml-3">
+          ✕
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="px-6 py-5 space-y-4">
+        <div>
+          <label class="label">Nome *</label>
+          <input type="text" [(ngModel)]="form.name" class="input" placeholder="Ex: Geek"/>
+        </div>
+        <div>
+          <label class="label">Descrição</label>
+          <textarea [(ngModel)]="form.description" rows="2" class="input resize-none" placeholder="Descrição breve..."></textarea>
+        </div>
+        <div>
+          <label class="label">Ordem de exibição</label>
+          <input type="number" [(ngModel)]="form.displayOrder" class="input" min="0"/>
+        </div>
+        <label class="flex items-center gap-2 text-sm cursor-pointer text-dark-800">
+          <input type="checkbox" [(ngModel)]="form.isActive" class="rounded text-primary-500">
+          Ativa
+        </label>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 pb-6 flex gap-3 border-t border-gray-100 pt-4">
+        <button (click)="save()" [disabled]="saving" class="btn-primary flex-1 disabled:opacity-50">
+          {{ saving ? 'Salvando...' : 'Salvar' }}
+        </button>
+        <button (click)="showForm=false" class="btn-secondary flex-1">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>

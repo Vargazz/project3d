@@ -1,0 +1,120 @@
+<div>
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-black" style="color:var(--text)">Administradores</h1>
+      <p class="text-sm mt-1" style="color:var(--text-muted)">Gerencie os usuários com acesso ao painel admin.</p>
+    </div>
+    <button (click)="showForm = !showForm" class="btn-vm">+ Novo admin</button>
+  </div>
+
+  <!-- Formulário novo admin -->
+  <div *ngIf="showForm" class="vm-card p-6 mb-6">
+    <h3 class="font-bold mb-4" style="color:var(--text)">Criar novo administrador</h3>
+    <form [formGroup]="form" (ngSubmit)="create()" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div>
+        <label class="label">Nome completo *</label>
+        <input type="text" formControlName="fullName" class="input"
+          [class.input-error]="form.controls['fullName'].touched && form.controls['fullName'].invalid"
+          placeholder="Nome do administrador"/>
+        <p *ngIf="form.controls['fullName'].touched && form.controls['fullName'].invalid" class="error-msg">Mínimo 3 caracteres.</p>
+      </div>
+      <div>
+        <label class="label">E-mail *</label>
+        <input type="email" formControlName="email" class="input"
+          [class.input-error]="form.controls['email'].touched && form.controls['email'].invalid"
+          placeholder="email@vm3d.com"/>
+        <p *ngIf="form.controls['email'].touched && form.controls['email'].invalid" class="error-msg">E-mail inválido.</p>
+      </div>
+      <div>
+        <label class="label">Senha *</label>
+        <input type="password" formControlName="password" class="input"
+          [class.input-error]="form.controls['password'].touched && form.controls['password'].invalid"
+          placeholder="Mín. 8 chars, 1 maiúscula, 1 número, 1 especial"/>
+        <p *ngIf="form.controls['password'].touched && form.controls['password'].invalid" class="error-msg">
+          Mín. 8 chars, 1 maiúscula, 1 número e 1 caractere especial.
+        </p>
+      </div>
+      <div class="sm:col-span-3 flex gap-3">
+        <button type="submit" [disabled]="saving" class="btn-vm">
+          {{ saving ? 'Criando...' : 'Criar administrador' }}
+        </button>
+        <button type="button" (click)="showForm=false; form.reset()" class="btn-secondary">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Lista -->
+  <div class="vm-card overflow-hidden">
+    <div *ngIf="loading" class="p-8 text-center" style="color:var(--text-muted)">Carregando...</div>
+    <table *ngIf="!loading" class="w-full text-sm">
+      <thead style="background:var(--surface-2); border-bottom:1px solid var(--border)">
+        <tr>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--text-muted)">Nome</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--text-muted)">E-mail</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--text-muted)">Status</th>
+          <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide" style="color:var(--text-muted)">Criado em</th>
+          <th class="px-5 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let a of admins"
+          class="border-b transition-colors"
+          style="border-color:var(--border)"
+          onmouseenter="this.style.background='var(--surface-2)'"
+          onmouseleave="this.style.background='transparent'">
+          <td class="px-5 py-3">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                style="background:linear-gradient(135deg,#9B59B6,#00BCD4)">
+                {{a.fullName?.[0]?.toUpperCase()}}
+              </div>
+              <span class="font-semibold" style="color:var(--text)">{{a.fullName}}</span>
+            </div>
+          </td>
+          <td class="px-5 py-3" style="color:var(--text-muted)">{{a.email}}</td>
+          <td class="px-5 py-3">
+            <span class="badge" [class.badge-green]="a.isActive" [class.badge-red]="!a.isActive">
+              {{a.isActive ? 'Ativo' : 'Inativo'}}
+            </span>
+          </td>
+          <td class="px-5 py-3 text-xs" style="color:var(--text-muted)">{{a.createdAt | date:'dd/MM/yyyy'}}</td>
+          <td class="px-5 py-3">
+            <div class="flex gap-2 justify-end">
+              <button (click)="openReset(a.id)"
+                class="btn-secondary btn-sm text-xs">
+                🔑 Redefinir senha
+              </button>
+              <button (click)="delete(a)"
+                class="btn-danger btn-sm text-xs">
+                Excluir
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="!admins.length">
+          <td colspan="5" class="text-center py-10 text-sm" style="color:var(--text-muted)">Nenhum administrador encontrado.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal redefinir senha -->
+  <div *ngIf="resetId" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background:rgba(0,0,0,0.5); backdrop-filter:blur(4px)"
+    (click)="resetId=null">
+    <div class="vm-card p-6 w-full max-w-sm" (click)="$event.stopPropagation()">
+      <h3 class="font-bold mb-4" style="color:var(--text)">🔑 Redefinir senha</h3>
+      <div class="mb-4">
+        <label class="label">Nova senha</label>
+        <input type="password" [(ngModel)]="resetPwd" class="input"
+          placeholder="Mín. 8 caracteres"/>
+      </div>
+      <div class="flex gap-3">
+        <button (click)="confirmReset()" [disabled]="resetting || !resetPwd" class="btn-vm flex-1">
+          {{resetting ? 'Redefinindo...' : 'Confirmar'}}
+        </button>
+        <button (click)="resetId=null" class="btn-secondary flex-1">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>

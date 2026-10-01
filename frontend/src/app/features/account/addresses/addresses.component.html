@@ -1,0 +1,44 @@
+<div class="space-y-4">
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-bold text-dark-900">Meus Endereços</h2>
+    <button (click)="showForm = !showForm" class="btn-primary btn-sm">+ Novo endereço</button>
+  </div>
+
+  <div *ngIf="showForm" class="card p-5">
+    <h3 class="font-semibold mb-4">Novo endereço</h3>
+    <form [formGroup]="form" (ngSubmit)="save()" class="grid grid-cols-2 gap-4">
+      <div><label class="label">Rótulo</label><input type="text" formControlName="label" class="input" placeholder="Casa, Trabalho..."/></div>
+      <div><label class="label">CEP *</label><input type="text" formControlName="zipCode" class="input" [class.input-error]="form.controls['zipCode'].invalid && form.controls['zipCode'].touched" placeholder="00000-000"/></div>
+      <div><label class="label">Estado *</label><input type="text" formControlName="state" class="input" placeholder="SP" maxlength="2"/></div>
+      <div><label class="label">Cidade *</label><input type="text" formControlName="city" class="input"/></div>
+      <div><label class="label">Bairro *</label><input type="text" formControlName="neighborhood" class="input"/></div>
+      <div><label class="label">Rua *</label><input type="text" formControlName="street" class="input"/></div>
+      <div><label class="label">Número *</label><input type="text" formControlName="number" class="input"/></div>
+      <div><label class="label">Complemento</label><input type="text" formControlName="complement" class="input"/></div>
+      <div class="col-span-2 flex items-center gap-2">
+        <input type="checkbox" formControlName="isDefault" class="rounded text-primary-500"/>
+        <label class="text-sm text-gray-600">Endereço padrão</label>
+      </div>
+      <div class="col-span-2 flex gap-3">
+        <button type="submit" [disabled]="saving" class="btn-primary">{{ saving ? 'Salvando...' : 'Salvar' }}</button>
+        <button type="button" (click)="showForm=false" class="btn-secondary">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <app-loading *ngIf="loading"></app-loading>
+  <div *ngIf="!loading && !addresses.length && !showForm" class="card p-8 text-center">
+    <p class="text-gray-500">Nenhum endereço cadastrado.</p>
+  </div>
+  <div *ngFor="let a of addresses" class="card p-4 flex items-start justify-between gap-4">
+    <div>
+      <p class="font-semibold text-dark-900">{{ a.label }} <span *ngIf="a.isDefault" class="badge badge-primary ml-2 text-xs">Padrão</span></p>
+      <p class="text-sm text-gray-600">{{ a.street }}, {{ a.number }}<span *ngIf="a.complement">, {{ a.complement }}</span></p>
+      <p class="text-sm text-gray-600">{{ a.neighborhood }} — {{ a.city }}/{{ a.state }}</p>
+      <p class="text-sm text-gray-500">CEP: {{ a.zipCode }}</p>
+    </div>
+    <button (click)="remove(a.id)" class="text-gray-400 hover:text-red-500 transition-colors p-1 shrink-0">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+    </button>
+  </div>
+</div>

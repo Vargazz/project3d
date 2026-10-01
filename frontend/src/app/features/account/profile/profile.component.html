@@ -1,0 +1,52 @@
+<div class="space-y-6">
+  <h2 class="text-xl font-bold text-dark-900">Meu Perfil</h2>
+
+  <div class="card p-6">
+    <h3 class="font-semibold text-dark-800 mb-4">Dados pessoais</h3>
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="sm:col-span-2">
+        <label class="label">Nome completo</label>
+        <input type="text" formControlName="fullName" class="input" [class.input-error]="profileForm.controls['fullName'].invalid && profileForm.controls['fullName'].touched"/>
+      </div>
+      <div>
+        <label class="label">Telefone</label>
+        <input type="tel" formControlName="phone" class="input" placeholder="(11) 99999-9999"/>
+      </div>
+      <div>
+        <label class="label">CPF</label>
+        <input type="text" formControlName="cpf" class="input" placeholder="000.000.000-00"/>
+      </div>
+      <div>
+        <label class="label">E-mail</label>
+        <input type="email" [value]="auth.currentUser?.email" class="input bg-gray-50" disabled/>
+        <p class="text-xs text-gray-400 mt-1">O e-mail não pode ser alterado.</p>
+      </div>
+      <div class="sm:col-span-2">
+        <button type="submit" [disabled]="loading || profileForm.invalid" class="btn-primary">
+          {{ loading ? 'Salvando...' : 'Salvar alterações' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card p-6">
+    <h3 class="font-semibold text-dark-800 mb-4">Alterar senha</h3>
+    <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="space-y-4 max-w-sm">
+      <div>
+        <label class="label">Senha atual</label>
+        <input type="password" formControlName="currentPassword" class="input"/>
+      </div>
+      <div>
+        <label class="label">Nova senha</label>
+        <input type="password" formControlName="newPassword" class="input" placeholder="Mínimo 8 caracteres"/>
+      </div>
+      <div>
+        <label class="label">Confirmar nova senha</label>
+        <input type="password" formControlName="confirmNewPassword" class="input"/>
+      </div>
+      <button type="submit" [disabled]="pwLoading || passwordForm.invalid" class="btn-primary">
+        {{ pwLoading ? 'Alterando...' : 'Alterar senha' }}
+      </button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,29 @@
+<div class="space-y-4">
+  <h2 class="text-xl font-bold text-dark-900">Orçamentos</h2>
+  <app-loading *ngIf="loading"></app-loading>
+  <div *ngIf="!loading && !requests.length" class="card p-10 text-center">
+    <span class="text-4xl block mb-3">💰</span>
+    <p class="text-gray-500">Nenhum orçamento disponível ainda.</p>
+  </div>
+  <div *ngFor="let r of requests" class="card p-5">
+    <p class="font-bold text-dark-900 mb-1">{{ r.productType }}</p>
+    <p class="text-xs text-gray-500 mb-3">Solicitação #{{ r.requestNumber }}</p>
+    <div *ngFor="let q of r.quotes" class="bg-gray-50 rounded-xl p-4 mb-2">
+      <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+        <div>
+          <span class="text-2xl font-black text-dark-900">{{ q.price | currencyBrl }}</span>
+          <span class="text-sm text-gray-500 ml-2">· {{ q.deadlineDays }} dias úteis</span>
+        </div>
+        <span class="badge" [class]="q.status === 'Accepted' ? 'badge-green' : q.status === 'Sent' ? 'badge-yellow' : 'badge-red'">
+          {{ q.status === 'Accepted' ? '✓ Aceito' : q.status === 'Sent' ? 'Aguardando' : 'Recusado' }}
+        </span>
+      </div>
+      <p *ngIf="q.description" class="text-sm text-gray-600 mb-3">{{ q.description }}</p>
+      <button *ngIf="q.status === 'Accepted'" (click)="pay(q.id)" [disabled]="paying === q.id"
+        class="btn-primary flex items-center gap-2">
+        <svg *ngIf="paying === q.id" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        {{ paying === q.id ? 'Redirecionando...' : '💳 Pagar agora' }}
+      </button>
+    </div>
+  </div>
+</div>

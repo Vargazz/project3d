@@ -1,0 +1,207 @@
+<app-header></app-header>
+
+<main class="min-h-screen bg-gray-50">
+  <app-loading *ngIf="loading" text="Carregando produto..."></app-loading>
+
+  <!-- Not found -->
+  <div *ngIf="!loading && notFound" class="container-app py-20 text-center">
+    <span class="text-5xl block mb-4">😕</span>
+    <h2 class="text-2xl font-bold text-dark-900 mb-3">Produto não encontrado</h2>
+    <p class="text-gray-500 mb-6">Este produto pode ter sido removido ou o link está incorreto.</p>
+    <a routerLink="/produtos" class="btn-primary">Ver todos os produtos</a>
+  </div>
+
+  <ng-container *ngIf="!loading && product">
+    <!-- Breadcrumb -->
+    <div class="bg-white border-b border-gray-200">
+      <div class="container-app py-3 flex items-center gap-2 text-sm text-gray-500 flex-wrap">
+        <a routerLink="/" class="hover:text-primary-500">Home</a>
+        <span>/</span>
+        <a routerLink="/produtos" class="hover:text-primary-500">Produtos</a>
+        <span *ngIf="product.categoryName">/</span>
+        <a *ngIf="product.categoryName"
+          [routerLink]="['/produtos']" [queryParams]="{categoryId: product.categoryId}"
+          class="hover:text-primary-500">{{ product.categoryName }}</a>
+        <span>/</span>
+        <span class="text-dark-800 font-medium truncate max-w-xs">{{ product.name }}</span>
+      </div>
+    </div>
+
+    <!-- Main product section -->
+    <section class="container-app py-8">
+      <div class="grid md:grid-cols-2 gap-8 lg:gap-12">
+
+        <!-- ── Gallery ── -->
+        <div class="space-y-3">
+          <!-- Main image -->
+          <div class="aspect-square bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm flex items-center justify-center">
+            <img *ngIf="currentImageUrl; else noImg"
+              [src]="currentImageUrl" [alt]="product.name"
+              class="w-full h-full object-contain p-4">
+            <ng-template #noImg>
+              <span class="text-6xl">📦</span>
+            </ng-template>
+          </div>
+          <!-- Thumbnails -->
+          <div *ngIf="currentImages.length > 1" class="flex gap-2 overflow-x-auto pb-1">
+            <button *ngFor="let img of currentImages; let i = index"
+              (click)="selectedImageIndex = i"
+              [class.ring-2]="selectedImageIndex === i"
+              [class.ring-primary-500]="selectedImageIndex === i"
+              class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-gray-200 hover:border-primary-400 transition-all">
+              <img [src]="img.url" [alt]="img.altText || product.name" class="w-full h-full object-cover">
+            </button>
+          </div>
+          <!-- Badges -->
+          <div class="flex gap-2 flex-wrap">
+            <span *ngIf="product.isFeatured" class="badge bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">⭐ Destaque</span>
+            <span *ngIf="product.isNew" class="badge bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">🆕 Novidade</span>
+            <span *ngIf="!inStock" class="badge bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full">Sem estoque</span>
+            <span *ngIf="hasDiscount" class="badge bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">-{{ discountPercent }}% OFF</span>
+          </div>
+        </div>
+
+        <!-- ── Info ── -->
+        <div class="space-y-5">
+          <div>
+            <p class="text-sm text-primary-500 font-medium mb-1">{{ product.categoryName }}</p>
+            <h1 class="text-2xl lg:text-3xl font-black text-dark-900 leading-tight">{{ product.name }}</h1>
+            <p *ngIf="product.sku" class="text-xs text-gray-400 mt-1">SKU: {{ product.sku }}</p>
+          </div>
+
+          <!-- Price -->
+          <div>
+            <div *ngIf="hasDiscount" class="flex items-center gap-2">
+              <span class="text-3xl font-black text-primary-600">{{ currentPrice | currencyBrl }}</span>
+              <span class="text-lg text-gray-400 line-through">{{ product.price | currencyBrl }}</span>
+              <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">-{{ discountPercent }}%</span>
+            </div>
+            <span *ngIf="!hasDiscount" class="text-3xl font-black text-dark-900">{{ currentPrice | currencyBrl }}</span>
+            <p *ngIf="selectedVariant?.priceModifier && selectedVariant!.priceModifier > 0"
+              class="text-xs text-gray-500 mt-1">
+              + {{ selectedVariant!.priceModifier | currencyBrl }} pela variação selecionada
+            </p>
+          </div>
+
+          <!-- Stock -->
+          <div class="flex items-center gap-2">
+            <span [class.text-green-600]="inStock" [class.text-red-500]="!inStock" class="flex items-center gap-1.5 text-sm font-medium">
+              <span [class.bg-green-500]="inStock" [class.bg-red-400]="!inStock" class="w-2 h-2 rounded-full"></span>
+              {{ inStock ? 'Em estoque' : 'Sem estoque' }}
+            </span>
+            <span *ngIf="inStock && product.stockQuantity && product.stockQuantity <= 5"
+              class="text-xs text-orange-500">(apenas {{ product.stockQuantity }} restante{{ product.stockQuantity > 1 ? 's' : '' }})</span>
+          </div>
+
+          <!-- Variants -->
+          <div *ngIf="product.variants?.length">
+            <label class="text-sm font-semibold text-dark-800 mb-2 block">
+              {{ product.variants[0].type === 'Color' ? 'Cor' : product.variants[0].type === 'Size' ? 'Tamanho' : 'Variação' }}
+              <span *ngIf="selectedVariant" class="font-normal text-primary-500">: {{ selectedVariant.value }}</span>
+            </label>
+            <div class="flex flex-wrap gap-2">
+              <button *ngFor="let v of product.variants"
+                (click)="selectVariant(v)"
+                [disabled]="!v.isActive"
+                [class.ring-2]="selectedVariant?.id === v.id"
+                [class.ring-primary-500]="selectedVariant?.id === v.id"
+                [class.opacity-40]="!v.isActive"
+                class="px-3 py-1.5 rounded-lg border border-gray-300 text-sm hover:border-primary-400 transition-all disabled:cursor-not-allowed">
+                {{ v.value }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Customization fields -->
+          <div *ngIf="product.customizationFields?.length" [formGroup]="customForm" class="space-y-3">
+            <h3 class="text-sm font-semibold text-dark-800">✏️ Personalização</h3>
+            <div *ngFor="let field of product.customizationFields">
+              <label class="block text-sm text-gray-600 mb-1">
+                {{ field.label }}
+                <span *ngIf="field.isRequired" class="text-red-500 ml-0.5">*</span>
+              </label>
+
+              <!-- Text / Textarea -->
+              <input *ngIf="field.fieldType === 'Text' || field.fieldType === 'Number'"
+                [formControlName]="field.id"
+                [type]="field.fieldType === 'Number' ? 'number' : 'text'"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+                [class.border-red-400]="customForm.get(field.id)?.invalid && customForm.get(field.id)?.touched">
+
+              <textarea *ngIf="field.fieldType === 'Textarea'"
+                [formControlName]="field.id" rows="3"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 resize-none"
+                [class.border-red-400]="customForm.get(field.id)?.invalid && customForm.get(field.id)?.touched">
+              </textarea>
+
+              <select *ngIf="field.fieldType === 'Select'"
+                [formControlName]="field.id"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400">
+                <option value="">Selecione...</option>
+                <option *ngFor="let opt of getFieldOptions(field)" [value]="opt">{{ opt }}</option>
+              </select>
+
+              <input *ngIf="field.fieldType === 'Color'"
+                [formControlName]="field.id" type="color"
+                class="w-12 h-10 rounded cursor-pointer border border-gray-300">
+
+              <p *ngIf="customForm.get(field.id)?.invalid && customForm.get(field.id)?.touched"
+                class="text-xs text-red-500 mt-1">Campo obrigatório</p>
+            </div>
+          </div>
+
+          <!-- Quantity + Buttons -->
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center gap-3">
+              <label class="text-sm font-medium text-gray-600">Quantidade:</label>
+              <div class="flex items-center border border-gray-300 rounded-xl overflow-hidden">
+                <button (click)="changeQty(-1)" class="px-3 py-2 hover:bg-gray-100 transition-colors text-lg leading-none">−</button>
+                <span class="px-4 py-2 text-sm font-semibold min-w-[40px] text-center">{{ quantity }}</span>
+                <button (click)="changeQty(1)" class="px-3 py-2 hover:bg-gray-100 transition-colors text-lg leading-none">+</button>
+              </div>
+            </div>
+
+            <div class="flex gap-3">
+              <button (click)="addToCart()" [disabled]="!inStock || addingToCart"
+                class="flex-1 btn-secondary py-3 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.35 2.7A1 1 0 007 17h11M17 17a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                {{ addingToCart ? 'Adicionando...' : 'Adicionar ao carrinho' }}
+              </button>
+              <button (click)="buyNow()" [disabled]="!inStock"
+                class="flex-1 btn-primary py-3 disabled:opacity-50 disabled:cursor-not-allowed">
+                Comprar agora
+              </button>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="pt-4 border-t border-gray-100">
+            <h3 class="text-sm font-semibold text-dark-800 mb-2">Descrição</h3>
+            <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{{ product.description }}</p>
+          </div>
+
+          <!-- Tags -->
+          <div *ngIf="product.tags" class="flex flex-wrap gap-1.5">
+            <span *ngFor="let tag of product.tags.split(',')"
+              class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">#{{ tag.trim() }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related products -->
+    <section *ngIf="relatedProducts.length" class="bg-white border-t border-gray-100 py-10">
+      <div class="container-app">
+        <h2 class="section-title mb-6">Produtos relacionados</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <app-product-card *ngFor="let p of relatedProducts" [product]="p"></app-product-card>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+</main>
+
+<app-footer></app-footer>
