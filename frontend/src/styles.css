@@ -36,6 +36,81 @@
   --shadow-hover: 0 6px 24px rgba(0,0,0,0.6);
 }
 
+/* ── Dark mode: sobrescreve classes Tailwind hardcoded ───────────────────── */
+/* bg-white / bg-gray-50 / bg-gray-100 → superfícies escuras no dark mode   */
+.dark .bg-white          { background-color: var(--surface)   !important; }
+.dark .bg-gray-50        { background-color: var(--surface-2) !important; }
+.dark .bg-gray-100       { background-color: var(--surface-2) !important; }
+.dark .bg-gray-200       { background-color: #2d2d44          !important; }
+
+/* Bordas */
+.dark .border-gray-100   { border-color: var(--border) !important; }
+.dark .border-gray-200   { border-color: var(--border) !important; }
+.dark .border-gray-300   { border-color: var(--border) !important; }
+
+/* Textos */
+.dark .text-dark-900     { color: #f1f5f9  !important; }
+.dark .text-dark-800     { color: #e2e8f0  !important; }
+.dark .text-dark-700     { color: #cbd5e1  !important; }
+.dark .text-gray-600     { color: #94a3b8  !important; }
+.dark .text-gray-500     { color: #64748b  !important; }
+.dark .text-gray-400     { color: #475569  !important; }
+.dark .text-gray-700     { color: #94a3b8  !important; }
+
+/* Inputs e selects */
+.dark input:not([type=checkbox]):not([type=radio]),
+.dark select,
+.dark textarea {
+  background-color: var(--surface-2) !important;
+  border-color: var(--border)        !important;
+  color: var(--text)                 !important;
+}
+
+/* Hover states de linhas de tabela */
+.dark .hover\:bg-gray-50:hover { background-color: rgba(255,255,255,0.04) !important; }
+.dark .hover\:bg-gray-100:hover{ background-color: rgba(255,255,255,0.06) !important; }
+
+/* Fundo de páginas principais */
+.dark main.min-h-screen.bg-gray-50 { background-color: var(--bg) !important; }
+
+/* ── Força tema claro (painel admin — nunca usa dark mode) ───────────────── */
+.force-light,
+.dark .force-light {
+  --bg:           #f4f4f8;
+  --bg-alt:       #ffffff;
+  --surface:      #ffffff;
+  --surface-2:    #f8f9fa;
+  --border:       #e2e8f0;
+  --text:         #1e293b;
+  --text-muted:   #64748b;
+  --text-light:   #94a3b8;
+  --shadow:       0 2px 8px rgba(0,0,0,0.08);
+  --shadow-hover: 0 6px 20px rgba(0,0,0,0.12);
+  color: #1e293b;
+  background-color: #f4f4f8;
+}
+/* Cancela os overrides do dark mode dentro do admin */
+.dark .force-light .bg-white          { background-color: #ffffff   !important; }
+.dark .force-light .bg-gray-50        { background-color: #f8f9fa   !important; }
+.dark .force-light .bg-gray-100       { background-color: #f1f5f9   !important; }
+.dark .force-light .border-gray-100   { border-color: #e2e8f0       !important; }
+.dark .force-light .border-gray-200   { border-color: #d1d5db       !important; }
+.dark .force-light .text-dark-900     { color: #0f172a              !important; }
+.dark .force-light .text-dark-800     { color: #1e293b              !important; }
+.dark .force-light .text-dark-700     { color: #334155              !important; }
+.dark .force-light .text-gray-600     { color: #4b5563              !important; }
+.dark .force-light .text-gray-500     { color: #6b7280              !important; }
+.dark .force-light .text-gray-400     { color: #9ca3af              !important; }
+.dark .force-light input:not([type=checkbox]):not([type=radio]),
+.dark .force-light select,
+.dark .force-light textarea {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0    !important;
+  color: #1e293b            !important;
+}
+.dark .force-light .hover\:bg-gray-50:hover  { background-color: #f9fafb !important; }
+.dark .force-light .hover\:bg-gray-100:hover { background-color: #f1f5f9 !important; }
+
 /* ── Base ────────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }

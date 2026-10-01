@@ -1,32 +1,98 @@
 <div class="space-y-4">
   <h2 class="text-xl font-bold text-dark-900">Meus Pedidos</h2>
+
   <app-loading *ngIf="loading"></app-loading>
-  <div *ngIf="!loading && !orders.length" class="card p-10 text-center">
-    <span class="text-4xl block mb-3">📦</span>
-    <p class="text-gray-500">Você ainda não fez pedidos.</p>
-    <a routerLink="/produtos" class="btn-primary mt-4 inline-block">Ver produtos</a>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && !orders.length" class="card p-12 text-center">
+    <span class="text-5xl block mb-4">📦</span>
+    <h3 class="font-bold text-dark-800 mb-2">Nenhum pedido ainda</h3>
+    <p class="text-gray-500 text-sm mb-6">Quando você fizer um pedido, ele aparecerá aqui.</p>
+    <a routerLink="/produtos"
+      class="btn-primary inline-flex items-center gap-2">
+      Ver produtos
+    </a>
   </div>
-  <div *ngFor="let o of orders" class="card p-4 space-y-3">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <div>
-        <span class="text-xs text-gray-500">Pedido</span>
-        <p class="font-bold text-dark-900">#{{ o.orderNumber }}</p>
-        <p class="text-xs text-gray-500">{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
-      </div>
-      <div class="flex gap-2 flex-wrap">
-        <span class="badge" [class]="statusClass(o.status)">{{ statusLabels[o.status] }}</span>
-        <span *ngIf="o.trackingCode" class="badge badge-blue">📦 {{ o.trackingCode }}</span>
-      </div>
-      <span class="font-bold text-dark-900">{{ o.total | currencyBrl }}</span>
-    </div>
-    <div class="flex gap-2 overflow-x-auto pb-1">
-      <div *ngFor="let item of o.items" class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 flex-shrink-0">
-        <img *ngIf="item.productImageUrl" [src]="item.productImageUrl" class="w-8 h-8 object-cover rounded">
+
+  <!-- Lista de pedidos -->
+  <div *ngFor="let o of orders" class="card overflow-hidden">
+
+    <!-- Cabeçalho do pedido -->
+    <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-gray-100"
+      style="background: #fafafa;">
+      <div class="flex items-center gap-4 flex-wrap">
         <div>
-          <p class="text-xs font-medium text-dark-900 max-w-[150px] truncate">{{ item.productName }}</p>
-          <p class="text-xs text-gray-500">x{{ item.quantity }} — {{ item.unitPrice | currencyBrl }}</p>
+          <p class="text-xs text-gray-400 mb-0.5">Pedido</p>
+          <p class="font-bold text-dark-900 text-sm">#{{ o.orderNumber }}</p>
+        </div>
+        <div class="hidden sm:block w-px h-8 bg-gray-200"></div>
+        <div>
+          <p class="text-xs text-gray-400 mb-0.5">Data</p>
+          <p class="text-sm text-dark-800">{{ o.createdAt | date:'dd/MM/yyyy' }}</p>
+        </div>
+        <div class="hidden sm:block w-px h-8 bg-gray-200"></div>
+        <div>
+          <p class="text-xs text-gray-400 mb-0.5">Total</p>
+          <p class="font-bold text-dark-900 text-sm">{{ o.total | currencyBrl }}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="badge" [class]="statusClass(o.status)">{{ statusLabels[o.status] }}</span>
+        <span *ngIf="o.trackingCode"
+          class="badge badge-blue flex items-center gap-1">
+          📦 {{ o.trackingCode }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Itens do pedido -->
+    <div class="px-5 py-4">
+      <div class="flex flex-col gap-3">
+        <div *ngFor="let item of o.items"
+          class="flex items-center gap-3">
+          <!-- Imagem -->
+          <div class="w-12 h-12 rounded-xl overflow-hidden border border-gray-100 flex-shrink-0 bg-gray-50">
+            <img *ngIf="item.productImageUrl" [src]="item.productImageUrl"
+              [alt]="item.productName" class="w-full h-full object-cover">
+            <div *ngIf="!item.productImageUrl"
+              class="w-full h-full flex items-center justify-center text-xl">📦</div>
+          </div>
+          <!-- Info -->
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-dark-900 truncate">{{ item.productName }}</p>
+            <p *ngIf="item.variantName" class="text-xs text-gray-500">{{ item.variantName }}</p>
+            <p class="text-xs text-gray-500">
+              {{ item.quantity }}x {{ item.unitPrice | currencyBrl }}
+            </p>
+          </div>
+          <!-- Subtotal -->
+          <p class="text-sm font-bold text-dark-900 flex-shrink-0">
+            {{ (item.unitPrice * item.quantity) | currencyBrl }}
+          </p>
         </div>
       </div>
     </div>
+
+    <!-- Footer do pedido -->
+    <div *ngIf="o.trackingCode"
+      class="px-5 py-3 border-t border-gray-100 flex items-center gap-2"
+      style="background: #f0f9ff;">
+      <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M20 7l-8-4-8 4m16 0v10a2 2 0 01-2 2H6a2 2 0 01-2-2V7m16 0L12 11M4 7l8 4"/>
+      </svg>
+      <p class="text-xs text-blue-700">
+        Código de rastreamento: <span class="font-bold">{{ o.trackingCode }}</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Paginação -->
+  <div *ngIf="totalItems > pageSize" class="flex justify-center gap-2 pt-2">
+    <button (click)="page = page - 1; loadOrders()" [disabled]="page <= 1"
+      class="btn-secondary btn-sm disabled:opacity-40">← Anterior</button>
+    <span class="px-3 py-1.5 text-sm text-gray-600">{{ page }}</span>
+    <button (click)="page = page + 1; loadOrders()" [disabled]="orders.length < pageSize"
+      class="btn-secondary btn-sm disabled:opacity-40">Próxima →</button>
   </div>
 </div>

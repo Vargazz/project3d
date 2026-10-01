@@ -69,23 +69,6 @@
         <ng-template #noSales><p class="text-gray-400 text-sm text-center py-8">Sem dados de vendas ainda.</p></ng-template>
       </div>
 
-      <!-- Top products -->
-      <div class="card p-5">
-        <h3 class="font-semibold text-dark-900 mb-4">🏆 Mais vendidos</h3>
-        <div class="space-y-3">
-          <div *ngFor="let p of data.topProducts; let i = index" class="flex items-center gap-3">
-            <span class="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center"
-              [class.bg-yellow-400]="i===0" [class.bg-gray-300]="i===1" [class.bg-orange-400]="i===2" [class.bg-gray-100]="i>2"
-              [class.text-white]="i<=2">{{ i + 1 }}</span>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-dark-900 truncate">{{ p.productName }}</p>
-              <p class="text-xs text-gray-500">{{ p.soldCount }} vendidos</p>
-            </div>
-          </div>
-          <p *ngIf="!data.topProducts?.length" class="text-gray-400 text-sm">Nenhuma venda ainda.</p>
-        </div>
-      </div>
-
       <!-- Orders by status -->
       <div class="card p-5 lg:col-span-2">
         <h3 class="font-semibold text-dark-900 mb-4">Pedidos por status</h3>
